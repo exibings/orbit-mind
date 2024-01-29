@@ -1,8 +1,7 @@
 import json
 import os
 from typing import Literal 
-import pandas as pd
-
+from datasets import Dataset, DatasetDict, Image
 
 def count_func(x: str) -> str:
     x = int(x)
@@ -30,7 +29,7 @@ def area_func(x):
     elif 1000 < x:
         return "more than 1000 m²"
 
-def process_split(questions: list, answers: list, dataset: Literal["lr", "hr"]) -> pd.DataFrame:
+def process_split(questions: list, answers: list, split: str, dataset: Literal["lr", "hr"]) -> Dataset:
     records = {
         "type": [],
         "question": [],
@@ -53,55 +52,63 @@ def process_split(questions: list, answers: list, dataset: Literal["lr", "hr"]) 
             records["img_id"].append(question["img_id"])
             records["img"].append(os.path.join("data", f"rsvqa-{dataset}", "images", f"{question['img_id']}.tif"))
     
-    return pd.DataFrame.from_records(records)
+    return Dataset.from_dict(records, split=split)
 
-# rsvqa-lr
-# train split
-with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_train_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_train_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "lr").to_csv(os.path.join("data", "rsvqa-lr", "train.csv"))
+if __name__=="__main__": 
+    # rsvqa-lr
+    rsvqa_lr = DatasetDict()
+    # train split
+    with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_train_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_train_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_lr["train"] = process_split(questions, answers, "train", "lr")
 
-# validation split
-with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_val_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_val_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "lr").to_csv(os.path.join("data", "rsvqa-lr", "validation.csv"))
+    # validation split
+    with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_val_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_val_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_lr["validation"] = process_split(questions, answers, "validation", "lr")
 
-# test split
-with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_test_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_test_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "lr").to_csv(os.path.join("data", "rsvqa-lr", "test.csv"))
+    # test split
+    with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_test_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-lr", "raw", "LR_split_test_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_lr["test"] = process_split(questions, answers, "test", "lr")
+    
+    rsvqa_lr.save_to_disk(os.path.join("data", "rsvqa-hr", "hf"))
 
-# rsvqa-hr
-# train split
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_train_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_train_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "hr").to_csv(os.path.join("data", "rsvqa-hr", "train.csv"))
 
-# validation split
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_val_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_val_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "hr").to_csv(os.path.join("data", "rsvqa-hr", "validation.csv"))
+    # rsvqa-hr
+    rsvqa_hr = DatasetDict()
+    # train split
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_train_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_train_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_hr["train"] = process_split(questions, answers, "train", "hr")
 
-# test split
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "hr").to_csv(os.path.join("data", "rsvqa-hr", "test.csv"))
+    # validation split
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_val_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_val_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_hr["validation"] = process_split(questions, answers, "validation", "hr")
 
-# test phili split
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_phili_answers.json"), "r") as f:
-    answers = json.load(f)["answers"]
-with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_phili_questions.json"), "r") as f:
-    questions = json.load(f)["questions"]
-process_split(questions, answers, "hr").to_csv(os.path.join("data", "rsvqa-hr", "test_phili.csv"))
+    # test split
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_hr["test"] = process_split(questions, answers, "test", "hr")
+
+    # test phili split
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_phili_answers.json"), "r") as f:
+        answers = json.load(f)["answers"]
+    with open(os.path.join("data", "rsvqa-hr", "raw", "USGS_split_test_phili_questions.json"), "r") as f:
+        questions = json.load(f)["questions"]
+    rsvqa_hr["test_phili"] = process_split(questions, answers, "test_phili", "hr")
+    
+    rsvqa_hr.save_to_disk(os.path.join("data", "rsvqa-hr", "hf"))

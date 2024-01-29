@@ -1,0 +1,7 @@
+{
+    "count": "test",
+    "comp": "test2",
+    "rural_urban": "USER: <image>\nQuestion: <question>\nSelect the option that correctly answers the question: rural, urban.\nASSISTANT: ",
+    "presence": "test4",
+    "area": "test6"
+}

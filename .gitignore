@@ -3,10 +3,10 @@
 
 data/rsvqa-lr/images/*
 data/rsvqa-lr/raw/*
-data/rsvqa-lr/*.csv
+data/rsvqa-lr/hf/*
 data/rsvqa-hr/images/*
 data/rsvqa-hr/raw/*
-data/rsvqa-hr/*.csv
+data/rsvqa-hr/hf/*
 
 preprocessing
 clip-rsvqa
